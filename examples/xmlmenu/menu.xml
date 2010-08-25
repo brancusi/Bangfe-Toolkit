@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<navigation definition="TestMenuItem">
+	<prop id="direction" cascade="false">horizontal</prop>
+	<prop id="spaceV">1</prop>
+	<prop id="spaceH">20</prop>
+	<item uid="Top1UID" label="About" style="headerItem">
+		<prop id="align">right</prop>
+		<item uid="top1-001" label="Myth Myth Myth">
+			<content>Test Data</content>
+		</item>
+		<item uid="top1-002" label="Craft"/>
+		<item uid="top1-003" label="Lab"/>
+	</item>
+	<item uid="Top2UID" label="Experience" style="headerItem">
+		<item uid="top2-001" label="Custom"/>
+		<item uid="top2-002" label="Studio"/>
+		<item uid="top2-003" label="Projects"/>
+	</item>
+	<item uid="Top3UID" label="Contact" style="headerItem"/>
+</navigation>
