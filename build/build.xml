@@ -1,4 +1,4 @@
-<project name="Bangfe Toolkit AS3" basedir="../" default="swc">
+<project name="Bangfe Toolkit AS3" basedir="../" default="asdoc">
     
 	<!-- Set up a prefix for all environment variables. -->
 	<property environment="env."/>
