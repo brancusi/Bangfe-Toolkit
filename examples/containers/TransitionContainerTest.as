@@ -50,6 +50,7 @@ package
 		override protected function setDefaults():void
 		{
 			_transitionContainer = new TransitionContainer();
+			_transitionContainer.maxChildren = 3;
 			addChild(_transitionContainer);
 		}
 		
@@ -76,6 +77,7 @@ package
 					break;
 				case showView2 :
 					_view2 = new TestViewTwo();
+					_view2.y = 30;
 					_transitionContainer.addChild(_view2);
 					break;
 				case showView3 :
@@ -87,7 +89,7 @@ package
 		
 		private function removeViewButtonClickHandler ( e : MouseEvent ) : void
 		{
-			switch(e.target){
+			/*switch(e.target){
 				case removeView1 :
 					_transitionContainer.removeChild(_view1);			
 					break;
@@ -98,7 +100,7 @@ package
 					_transitionContainer.removeChild(_view3);
 					break;
 				
-			}
+			}*/
 		}
 		
 	}

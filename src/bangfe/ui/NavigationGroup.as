@@ -1,13 +1,16 @@
 package bangfe.ui
 {
 	
+	import bangfe.core.ICoreObject;
+	
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
 	import flash.events.MouseEvent;
 	
+	import org.osflash.signals.Signal;
+	
 	import system.data.Iterator;
 	import system.data.collections.ArrayCollection;
-	import system.signals.Signal;
 
 	/**
 	 * This manages navigation items. Much like a RadioButtonGroup, this
@@ -16,16 +19,16 @@ package bangfe.ui
 	 * @author Will Zadikian
 	 * 
 	 */
-	public class NavigationGroup
+	public class NavigationGroup implements ICoreObject
 	{
 		
 		//--------------------------------------
 		//  SIGNALS
 		//--------------------------------------
 		/**
-		 * The signal sent when an item is selected 
+		 * The signal dispatched when a <code>NavigationItem</code> is selected. 
 		 */		
-		public var itemSelected : Signal = new Signal([NavigationItem]);
+		public var itemSelected : Signal = new Signal(NavigationItem);
 		
 		//--------------------------------------
 		//  PRIVATE VARIABLES
@@ -42,6 +45,14 @@ package bangfe.ui
 		 */
 		public function NavigationGroup ()
 		{
+			//
+		}
+		
+		/** @inheritDoc */		
+		public function destroy () : void
+		{
+			clear();
+			itemSelected.removeAll();
 		}
 		
 		/**
@@ -208,8 +219,7 @@ package bangfe.ui
 			_selectedNavigationItem = p_navigationItem;
 			_selectedNavigationItem.setSelected(p_dispatchChange);
 			
-			//Dispatch the NavigationGroupEvent. The BasicButtonEvent can also be used
-			if(p_dispatchChange)itemSelected.emit(_selectedNavigationItem);
+			if(p_dispatchChange)itemSelected.dispatch(_selectedNavigationItem);
 		}
 		
 		//--------------------------------------

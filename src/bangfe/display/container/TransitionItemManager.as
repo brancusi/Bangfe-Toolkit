@@ -2,7 +2,6 @@ package bangfe.display.container
 {
 	import bangfe.core.ICoreObject;
 	import bangfe.core.ITransitionable;
-	import bangfe.events.TransitionItemManagerEvent;
 	import bangfe.events.TransitionableEvent;
 	
 	import com.greensock.TweenMax;
@@ -11,25 +10,39 @@ package bangfe.display.container
 	import flash.display.DisplayObjectContainer;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
-
-	/**
-	 * Dispatched when this TransitionItemManager's item has completed it's intro
-	 *
-	 * @eventType bangfe.events.TransitionItemManagerEvent.TRANSITION_IN_COMPLETE
-	 */			
-	[Event(name="itemTransitionInComplete", type="bangfe.events.TransitionItemManagerEvent")]
 	
-	/**
-	 * Dispatched when this TransitionItemManager's item has completed it's outro
-	 *
-	 * @eventType bangfe.events.TransitionItemManagerEvent.TRANSITION_OUT_COMPLETE
-	 */			
-	[Event(name="itemTransitionOutComplete", type="bangfe.events.TransitionItemManagerEvent")]
+	import org.osflash.signals.Signal;
 	
-	public class TransitionItemManager extends EventDispatcher implements ICoreObject, ITransitionable
+	public class TransitionItemManager implements ICoreObject, ITransitionable
 	{
 		
+		//--------------------------------------
+		//  PUBLIC STATIC CONSTANTS
+		//--------------------------------------
+		/**
+		 * Error message dispatched when there is no DisplayObject associated with the <code>TransitionItemManager</code>  
+		 */		
 		public static const MISSING_ITEM_ERROR_MESSAGE : String = "There is no item associated with this TransitionItemManager. Make sure to add this before acting on the manager";
+		
+		public static const TRANSITIONING_IN_STATE : String = "transitioningInState";
+		public static const TRANSITIONING_OUT_STATE : String = "transitioningOutState";
+		public static const ON_STATE : String = "onState";
+		public static const OFF_STATE : String = "offState";
+		
+		//--------------------------------------
+		//  SIGNALS
+		//--------------------------------------
+		/**
+		 * Signal sent when the managed <code>ITransitionable</code> instance has complete
+		 * its transitionIn
+		 */		
+		public var transitionInCompleted : Signal = new Signal(TransitionItemManager);
+		
+		/**
+		 * Signal sent when the managed <code>ITransitionable</code> instance has complete
+		 * its transitionOut
+		 */		
+		public var transitionOutCompleted : Signal = new Signal(TransitionItemManager);
 		
 		//--------------------------------------
 		//  PRIVATE VARIABLES
@@ -44,6 +57,8 @@ package bangfe.display.container
 		private var _isDestroyed : Boolean = false;
 		
 		private var _scope : DisplayObjectContainer;
+		
+		private var _currentState : String;
 		//--------------------------------------
 		//  PUBLIC METHODS
 		//--------------------------------------
@@ -64,6 +79,7 @@ package bangfe.display.container
 		{
 			if(!item)throw new Error(MISSING_ITEM_ERROR_MESSAGE);
 			
+			_currentState = TRANSITIONING_IN_STATE;
 			_isTransitioning = true;
 			
 			if(_hasStartedIntro)return;
@@ -87,6 +103,7 @@ package bangfe.display.container
 		{
 			if(!item)throw new Error(MISSING_ITEM_ERROR_MESSAGE);
 			
+			_currentState = TRANSITIONING_OUT_STATE;
 			_isTransitioning = true;
 			
 			if(_hasStartedOutro)return;
@@ -109,7 +126,8 @@ package bangfe.display.container
 			
 			_isTransitioning = false;
 			_hasCompletedIntro = true;
-			dispatchEvent(new TransitionItemManagerEvent(TransitionItemManagerEvent.TRANSITION_IN_COMPLETE));
+			
+			transitionInCompleted.dispatch(this);
 		}
 		
 		/**
@@ -122,7 +140,9 @@ package bangfe.display.container
 			
 			_isTransitioning = false;
 			_hasCompletedOutro = true;
-			dispatchEvent(new TransitionItemManagerEvent(TransitionItemManagerEvent.TRANSITION_OUT_COMPLETE));
+			
+			transitionOutCompleted.dispatch(this);
+			
 			destroy();
 		}
 		
@@ -134,7 +154,11 @@ package bangfe.display.container
 		{
 			if(_isDestroyed)return;
 			
-			destroyItem();			
+			//Cleanup signals
+			transitionOutCompleted.removeAll();
+			transitionInCompleted.removeAll();
+			
+			destroyItem();	
 			_isDestroyed = true;
 		}
 		
@@ -218,6 +242,15 @@ package bangfe.display.container
 		{
 			return _isDestroyed;
 		}
+		
+		/**
+		 * The current state of the <code>TransitionItemManager</code> 
+		 * 
+		 */		
+		public function get currentState () : String
+		{
+			return _currentState;
+		}
 
 		//--------------------------------------
 		//  PROTECTED METHODS
@@ -261,11 +294,13 @@ package bangfe.display.container
 		//--------------------------------------
 		private function transitionInCompleteHandler ( e : TransitionableEvent ) : void
 		{
+			_currentState = ON_STATE;
 			transitionInComplete();
 		}
 		
 		private function transitionOutCompleteHandler ( e : TransitionableEvent ) : void
 		{
+			_currentState = OFF_STATE;
 			transitionOutComplete();
 		}
 		
