@@ -5,10 +5,11 @@ package bangfe.core
 	import com.greensock.TweenMax;
 	
 	import flash.display.DisplayObject;
+	import flash.geom.Point;
 
 	public class TransitionableDisplayObject extends CoreDisplayObject implements ITransitionable
 	{
-		
+
 		//--------------------------------------
 		//  PUBLIC METHODS
 		//--------------------------------------

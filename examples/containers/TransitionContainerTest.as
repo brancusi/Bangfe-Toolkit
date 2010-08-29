@@ -119,7 +119,7 @@ package
 		private function clearAllButtonClickHandler ( e : MouseEvent ) : void
 		{
 			//_transitionContainer.clear();
-			_transitionContainer.maxChildren = 0;
+			_transitionContainer.maxChildren = 1;
 		}
 		
 		private function queueCompletedInHandler () : void
