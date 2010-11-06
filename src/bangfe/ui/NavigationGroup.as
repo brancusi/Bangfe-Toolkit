@@ -36,13 +36,7 @@ package bangfe.ui
 		//--------------------------------------
 		//  PUBLIC METHODS
 		//--------------------------------------
-		/**
-		 * Constructor 
-		 * 
-		 */
-		public function NavigationGroup ()
-		{
-		}
+
 		
 		/**
 		 * Clear out all associated items 
