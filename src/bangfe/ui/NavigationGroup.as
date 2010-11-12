@@ -84,7 +84,7 @@ package bangfe.ui
 				
 				//Bi-directional reflection, garantees both sides (NavigationGroup and Navigationitem)
 				//have knowledge of eachother, so creation and destruction works correctly
-				p_navigationItem.navigationGroup = this;
+				if(p_navigationItem.navigationGroup != this)p_navigationItem.navigationGroup = this;
 			}
 		}
 		

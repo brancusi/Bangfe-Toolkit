@@ -1,19 +1,17 @@
 package bangfe.utils
 {
 	import flash.display.DisplayObject;
+	import flash.display.DisplayObjectContainer;
 
 	public class DisplayObjectUtils
 	{
-		public function DisplayObjectUtils()
-		{
-		}
-		
+
 		/**
-		 * Bring the supplied DisplayObject to the front
+		 * Send the supplied DisplayObject to the front index. Will push the other items back
 		 * @param p_displayObject
 		 * 
 		 */		
-		public static function bringToFront ( p_displayObject : DisplayObject ) : void
+		public static function sendToFront ( p_displayObject : DisplayObject ) : void
 		{
 			if(!p_displayObject.parent)return;
 			var topChild : DisplayObject = p_displayObject.parent.getChildAt(p_displayObject.parent.numChildren-1);
@@ -44,6 +42,34 @@ package bangfe.utils
 			if(!p_displayObject.parent)return;
 			var bottomChild : DisplayObject = p_displayObject.parent.getChildAt(0);
 			p_displayObject.parent.swapChildren(p_displayObject, bottomChild);
+		}
+		
+		/**
+		 * Gets the parent with the correct definition
+		 * This is useful for getting a specific level of the display tree when dragging and dropping a display object
+		 * It cycles up and returns the specified object definied by the p_validClassDefintion param
+		 * 
+		 * @param p_displayObject The DisplayObject to start from
+		 * @param p_validClassDefintion The Class definition to validate against
+		 * @return 
+		 * 
+		 */		
+		public static function getParentWithDefinition ( p_displayObject : DisplayObject, p_validClassDefintion : Class ) : *
+		{
+			if(!p_displayObject) return null;
+			
+			if(p_displayObject is p_validClassDefintion)return p_displayObject;
+			
+			if(!p_displayObject.parent)return null;
+			
+			var targetCheck : DisplayObjectContainer = p_displayObject.parent;
+			
+			while(targetCheck){
+				if(targetCheck is p_validClassDefintion)return targetCheck;
+				targetCheck = targetCheck.parent;
+			}	
+			
+			return null;
 		}
 		
 		
