@@ -6,13 +6,18 @@
 	<!-- Copy Flex SDK location from environment variable. This can be set manually instead. -->
 	<property name="FLEX_HOME" value="${env.FLEX_HOME}" />
 	<property file="build/build.properties"/>
-
- 		<target name="swc" depends="" description="Compile AS3 code into a SWC">
+		
+		<target name="clean-swc">
+			<delete dir="${output.dir}" failOnError="false" includeEmptyDirs="true"/>
+			<mkdir dir="${output.dir}"/>
+		</target>
+		
+ 		<target name="swc" depends="clean-swc" description="Compile AS3 code into a SWC">
 			<echo>Using Flex SDK at: ${FLEX_HOME}</echo>
 
 			<java jar="${FLEX_HOME}/lib/compc.jar" dir="." fork="true" failonerror="true">
 				<arg value="+flexlib=${FLEX_HOME}/frameworks" />
-				<arg value="-incremental=true" />
+				<arg value="-incremental=false" />
 
 				<arg value="-source-path+=${src.dir}" />
 
@@ -34,7 +39,7 @@
 		</target>
 
 		<!-- Build Documentation -->
-		<target name="asdoc" depends="swc,clean-asdoc" description="Create API docs for ${project.title}">
+		<target name="docs" depends="swc,clean-asdoc" description="Create API docs for ${project.title}">
 			<echo>Generating ASDOC documentation...</echo>
 			<tstamp>
 				<format property="docgen.time" pattern="MM/dd/yyyy hh:mm aa" unit="hour"/>

@@ -13,7 +13,9 @@ package bangfe.display
 	import flash.events.IOErrorEvent;
 	import flash.geom.Matrix;
 	import flash.net.URLRequest;
+	import flash.system.ApplicationDomain;
 	import flash.system.LoaderContext;
+	import flash.system.SecurityDomain;
 
 	 /**
 	 * Dispatched once image has loaded and is added to the stage
@@ -318,7 +320,14 @@ package bangfe.display
 		{
 			_container.graphics.clear();
 			var request : URLRequest = new URLRequest(url);
-			imageLoader.load(request, new LoaderContext(true));
+			
+			var context : LoaderContext = new LoaderContext();
+			
+			//context.securityDomain = SecurityDomain.currentDomain; 
+			context.applicationDomain = ApplicationDomain.currentDomain; 
+			context.checkPolicyFile = true;
+			
+			imageLoader.load(request, context);
 		}
 		
 		protected function generateImage () : void

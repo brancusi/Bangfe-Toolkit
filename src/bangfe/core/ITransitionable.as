@@ -4,13 +4,17 @@ package bangfe.core
 	{
 		
 		/**
-		 * The transition in method 
+		 * The transition in method. 
+		 * Very important that you call the transitionInComplete method
+		 * or dispatch <code>TransitionableEvent</code> TRANSITION_IN_COMPLETE
 		 *
 		 */		
 		function transitionIn () : void;
 		
 		/**
-		 * The transition out method 
+		 * The transition out method.
+		 * Very important that you call the transitionOutComplete method
+		 * or dispatch <code>TransitionableEvent</code> TRANSITION_OUT_COMPLETE
 		 * 
 		 */		
 		function transitionOut () : void;

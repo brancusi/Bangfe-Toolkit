@@ -39,6 +39,9 @@ package bangfe.ui
 		//--------------------------------------
 		//  PUBLIC METHODS
 		//--------------------------------------
+<<<<<<< HEAD
+
+=======
 		/**
 		 * Constructor 
 		 * 
@@ -54,6 +57,7 @@ package bangfe.ui
 			clear();
 			itemSelected.removeAll();
 		}
+>>>>>>> internaldev
 		
 		/**
 		 * Clear out all associated items 
