@@ -1,5 +1,8 @@
 package bangfe.display
 {
+	import com.greensock.TweenLite;
+	import com.greensock.TweenMax;
+	
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.TimerEvent;
@@ -45,11 +48,14 @@ package bangfe.display
 		public function starSpin () : void
 		{
 			addEventListener(Event.ENTER_FRAME, rotateCircle, false, 0, true);
+			TweenMax.to(this, .25, {autoAlpha:1});
 		}
 		
 		public function stopSpin () : void
 		{
-			removeEventListener(Event.ENTER_FRAME, rotateCircle);
+			TweenMax.to(this, .25, {autoAlpha:0, onComplete:function():void{
+				removeEventListener(Event.ENTER_FRAME, rotateCircle);
+			}});
 		}
 		
 		//--------------------------------------
