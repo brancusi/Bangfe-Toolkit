@@ -35,10 +35,11 @@ package
 		//--------------------------------------	
 		override protected function setDefaults():void
 		{
-			_autoImage = new AutoImage(100, 100, AutoImage.NO_SCALE);
+			_autoImage = new AutoImage(131, 100, AutoImage.FILL);
 			
 			addChild(_autoImage);
-			_autoImage.url = "large.jpg"
+			//_autoImage.url = "large.jpg"
+			_autoImage.url = "sample.jpg"
 		}
 		
 		override protected function addListeners():void

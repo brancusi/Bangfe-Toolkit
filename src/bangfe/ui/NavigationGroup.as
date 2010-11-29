@@ -28,7 +28,7 @@ package bangfe.ui
 		/**
 		 * The signal dispatched when a <code>NavigationItem</code> is selected. 
 		 */		
-		public var itemSelected : Signal = new Signal(NavigationItem);
+		public var itemSelectedSignal : Signal = new Signal(NavigationItem);
 		
 		//--------------------------------------
 		//  PRIVATE VARIABLES
@@ -39,20 +39,11 @@ package bangfe.ui
 		//--------------------------------------
 		//  PUBLIC METHODS
 		//--------------------------------------
-		/**
-		 * Constructor 
-		 * 
-		 */
-		public function NavigationGroup ()
-		{
-			//
-		}
-		
 		/** @inheritDoc */		
 		public function destroy () : void
 		{
 			clear();
-			itemSelected.removeAll();
+			itemSelectedSignal.removeAll();
 		}
 		
 		/**
@@ -219,7 +210,7 @@ package bangfe.ui
 			_selectedNavigationItem = p_navigationItem;
 			_selectedNavigationItem.setSelected(p_dispatchChange);
 			
-			if(p_dispatchChange)itemSelected.dispatch(_selectedNavigationItem);
+			if(p_dispatchChange)itemSelectedSignal.dispatch(_selectedNavigationItem);
 		}
 		
 		//--------------------------------------
