@@ -7,6 +7,14 @@ package bangfe.ui
 	
 	import org.osflash.signals.Signal;
 
+	/**
+	 * A simple toggle button. Requires two stage instances:
+	 * 		1) onIcon
+	 * 		2) offIcon
+	 *  
+	 * @author Will Zadikian
+	 * 
+	 */	
 	public class ToggleButton extends BasicButton
 	{
 		
@@ -71,9 +79,24 @@ package bangfe.ui
 		//--------------------------------------
 		//  ACCESSOR/MUTATOR METHODS
 		//--------------------------------------
+		/**
+		 * Current state of the toggle. ToggleButton.ON or ToggleButton.OFF 
+		 * @return 
+		 * 
+		 */
 		public function get state () : String
 		{
 			return _currentState;
+		}
+		
+		/**
+		 * Is the toggle currently on 
+		 * @return 
+		 * 
+		 */		
+		public function get isOn () : Boolean
+		{
+			return (state == ON);
 		}
 		
 		//--------------------------------------
