@@ -76,6 +76,16 @@ package bangfe.ui
 			if(p_dispatch)offRequestedSignal.dispatch();
 		}
 		
+		/**
+		 * Is the toggle currently on 
+		 * @return 
+		 * 
+		 */		
+		public function isOn () : Boolean
+		{
+			return (state == ON);
+		}
+		
 		//--------------------------------------
 		//  ACCESSOR/MUTATOR METHODS
 		//--------------------------------------
@@ -87,16 +97,6 @@ package bangfe.ui
 		public function get state () : String
 		{
 			return _currentState;
-		}
-		
-		/**
-		 * Is the toggle currently on 
-		 * @return 
-		 * 
-		 */		
-		public function get isOn () : Boolean
-		{
-			return (state == ON);
 		}
 		
 		//--------------------------------------
@@ -123,14 +123,14 @@ package bangfe.ui
 		
 		protected function showOnState () : void
 		{
-			TweenMax.to(onIcon, .25, {autoAlpha:0});
-			TweenMax.to(offIcon, .25, {autoAlpha:1});
+			TweenMax.to(onIcon, .25, {autoAlpha:1});
+			TweenMax.to(offIcon, .25, {autoAlpha:0});
 		}
 		
 		protected function showOffState () : void
 		{
-			TweenMax.to(onIcon, .25, {autoAlpha:1});
-			TweenMax.to(offIcon, .25, {autoAlpha:0});
+			TweenMax.to(onIcon, .25, {autoAlpha:0});
+			TweenMax.to(offIcon, .25, {autoAlpha:1});
 		}
 		
 		//--------------------------------------

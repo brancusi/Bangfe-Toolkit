@@ -323,7 +323,6 @@ package bangfe.display
 			
 			var context : LoaderContext = new LoaderContext();
 			
-			//context.securityDomain = SecurityDomain.currentDomain; 
 			context.applicationDomain = ApplicationDomain.currentDomain; 
 			context.checkPolicyFile = true;
 			
