@@ -123,6 +123,8 @@ package bangfe.display
 			TweenLite.to(this, .25, {alpha:0, onUpdate:notifyTransitionChange, onComplete:function():void{
 				if(parent)parent.removeChild(this);
 			}});
+			
+			_url = null
 		}
 		
 		public function clearImages () : void
@@ -130,6 +132,8 @@ package bangfe.display
 			TweenLite.to(this, .25, {alpha:0, onUpdate:notifyTransitionChange, onComplete:function():void{
 				_container.graphics.clear();
 			}});
+			
+			_url = null
 		}
 		
 		//--------------------------------------
@@ -210,6 +214,7 @@ package bangfe.display
 
 		public function set url ( p_url : String ) : void
 		{
+			if(p_url == null || p_url == "")clearImages();
 			if(_url == p_url)return;
 			_url = p_url;
 			_extensionArray = EXTENSIONS_ARRAY.slice();

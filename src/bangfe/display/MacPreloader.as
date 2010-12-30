@@ -36,6 +36,9 @@ package bangfe.display
 		 */
 		public function MacPreloader(p_innerRadius:uint = 6, p_outerRadius:uint = 12, p_numberOfSegements:uint = 12)
 		{
+			this.visible = false;
+			this.alpha = 0;
+			
 			_innerRadius = p_innerRadius; 
 			_outerRadius = p_outerRadius; 
 			_numberOfSegments = p_numberOfSegements; 
