@@ -3,6 +3,8 @@ package bangfe.batchloader.utils
 	import bangfe.batchloader.BatchLoader;
 	import bangfe.utils.CountDownTimer;
 	
+	import calista.utils.Base64;
+	
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.events.KeyboardEvent;
@@ -85,7 +87,7 @@ package bangfe.batchloader.utils
 		}
 		
 		/**
-		 * Key to match against 
+		 * Key to match against - Base64 Encoded
 		 * @return 
 		 * 
 		 */
@@ -96,11 +98,11 @@ package bangfe.batchloader.utils
 
 		public function set matchKey ( p_matchKey : String ) : void
 		{
-			_matchKey = p_matchKey;
+			_matchKey = Base64.decode(p_matchKey);
 		}
 		
 		/**
-		 * Key to match against to remove 
+		 * Key to match against to remove  - Base64 Encoded
 		 * @return 
 		 * 
 		 */
@@ -111,7 +113,7 @@ package bangfe.batchloader.utils
 		
 		public function set removeKey ( p_removeKey : String ) : void
 		{
-			_removeKey = p_removeKey;
+			_removeKey = Base64.decode(p_removeKey);;
 		}
 		
 		/**
