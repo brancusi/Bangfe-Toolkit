@@ -30,6 +30,12 @@ package bangfe.display
 	[Event(name="imageTransitioning", type="bangfe.display.AutoImage")]
 	
 	/**
+	 * Dispatched in the event of a load error
+	 * @eventType bangfe.display.AutoImage.LOAD_ERROR
+	 */
+	[Event(name="loadError", type="bangfe.display.AutoImage")]
+	
+	/**
 	 * Simple image class. Takes a url and loads the image.
 	 * 
 	 */	
@@ -48,6 +54,11 @@ package bangfe.display
 		 * Image Transitioning event name
 		 */
 		public static const IMAGE_TRANSITIONING : String = "imageTransitioning";
+		
+		/**
+		 * Loading Error event name
+		 */
+		public static const LOAD_ERROR : String = "loadError";
 		
 		/**
 		 * The image should fill the area difined width and height.
@@ -403,6 +414,7 @@ package bangfe.display
 		{
 			if(_extensionArray.length < 1){
 				trace("There was no image found with URI: " + uri, "\n", "Attempted to use the following extensions : ", EXTENSIONS_ARRAY.toString());
+				dispatchEvent(new Event(AutoImage.LOAD_ERROR));
 				return;
 			}
 			

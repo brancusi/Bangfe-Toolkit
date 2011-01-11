@@ -48,7 +48,7 @@ package bangfe.display
 			draw();
 		}
 			
-		public function starSpin () : void
+		public function startSpin () : void
 		{
 			addEventListener(Event.ENTER_FRAME, rotateCircle, false, 0, true);
 			TweenMax.to(this, .25, {autoAlpha:1});

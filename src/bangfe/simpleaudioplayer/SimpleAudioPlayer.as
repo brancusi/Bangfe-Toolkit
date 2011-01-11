@@ -1,382 +1,1 @@
-package bangfe.simpleaudioplayer
-{
-	import com.greensock.TweenMax;
-	import com.greensock.plugins.AutoAlphaPlugin;
-	import com.greensock.plugins.TweenPlugin;
-	import com.greensock.plugins.VolumePlugin;
-	
-	import flash.display.MovieClip;
-	import flash.events.Event;
-	import flash.events.IOErrorEvent;
-	import flash.events.MouseEvent;
-	import flash.events.ProgressEvent;
-	import flash.media.Sound;
-	import flash.media.SoundChannel;
-	import flash.media.SoundTransform;
-	import flash.net.URLRequest;
-	
-	/**
-	 * Simple audio player. Toggle and volume. Great for background music
-	 * @author Will Zadikian
-	 * 
-	 */	
-	public class SimpleAudioPlayer extends MovieClip
-	{
-		
-		//--------------------------------------
-		//  PROTECTED VARIABLES
-		//--------------------------------------
-		protected var _source : String;
-		
-		protected var _soundChannel : SoundChannel;
-		protected var _transform : SoundTransform;
-		protected var _sound : Sound;
-		protected var _volume : Number = .8;
-		
-		protected var _lastPositon : Number = 0;
-		protected var _isPlaying : Boolean = false;
-		protected var _isManualPause : Boolean = false;
-		protected var _isInitialized : Boolean = false;
-		protected var _isTransitioning : Boolean = false;
-		
-		//--------------------------------------
-		//  PUBLIC METHODS
-		//--------------------------------------
-		
-		/**
-		 * Constructor 
-		 * 
-		 */		
-		public function SimpleAudioPlayer()
-		{
-			init();
-		}
-		
-		public function destroy () : void
-		{
-			removeListeners();
-			killAllSounds();
-		}
-		
-		/**
-		 * Toggle audio play/pause
-		 * 
-		 */		
-		public function toggle () : void
-		{
-			if(isPlaying){
-				pause(true);
-			}else{
-				resume(true);
-			}
-		}
-		
-		/**
-		 * Pause audio
-		 * @param p_manualPause
-		 * 
-		 */		
-		public function pause ( p_manualPause : Boolean = false ) : void
-		{
-			if(!_source)return;
-			
-			if(!isInitialized)return;
-			
-			if(!isPlaying)return;
-			
-			if(isTransitioning)return;
-			
-			if(_soundChannel == null)return;
-			
-			_lastPositon = _soundChannel.position;
-	
-			isTransitioning = true;
-			
-			if(p_manualPause)isManualPause = p_manualPause;
-			
-			isPlaying = false;
-			
-			TweenMax.to(_soundChannel, 1, {volume:0, onComplete:pauseComplete});
-		}
-		
-		/**
-		 * Resume audio 
-		 * @param p_manualResume
-		 * 
-		 */		
-		public function resume ( p_manualResume : Boolean = false ) : void
-		{
-			if(!_source)return;
-			
-			if(!isInitialized)return;
-			
-			if(isPlaying)return;
-			
-			if(isTransitioning)return;
-			
-			if(p_manualResume)isManualPause = false;
-			
-			if(isManualPause)return;
-			
-			if(_sound){
-				try{
-					_soundChannel.removeEventListener(Event.SOUND_COMPLETE, soundCompleteHandler, false);
-				}catch(e:Error){}
-				
-				isTransitioning = true;
-				
-				_soundChannel = _sound.play(_lastPositon, 0, new SoundTransform(0));
-				
-				_lastPositon = 0;
-				
-				_soundChannel.addEventListener(Event.SOUND_COMPLETE, soundCompleteHandler, false, 0, true);
-
-				TweenMax.to(_soundChannel, 1, {volume:_volume, onComplete:resumeComplete});
-			}
-		}
-		
-		/**
-		 * Show UI Controls
-		 * 
-		 */		
-		public function show () : void
-		{
-			TweenMax.to(this, .5, {autoAlpha:1});
-		}
-		
-		/**
-		 * Hide UI Controls 
-		 * 
-		 */		
-		public function hide () : void
-		{
-			TweenMax.to(this, .5, {autoAlpha:0});
-		}
-		
-		
-		//--------------------------------------
-		//  ACCESSOR METHODS
-		//--------------------------------------
-		
-		/**
-		 * Source url for current audio 
-		 * @return 
-		 * 
-		 */		
-		public function get source () : String 
-		{
-			return _source; 
-		}
-
-		public function set source ( p_source : String ) : void 
-		{ 
-			if(_source == p_source)return;
-			_source = p_source;
-			loadMusic();
-		}
-		
-		/**
-		 * Volume of audio 
-		 * @return 
-		 * 
-		 */		
-		public function get volume () : Number 
-		{
-			return _volume; 
-		}
-
-		public function set volume ( p_volume : Number ) : void 
-		{
-			_volume = p_volume;
-			if(_soundChannel && isPlaying)TweenMax.to(_soundChannel, 1, {volume:_volume});
-		}
-		
-		/**
-		 * Is the audio player currently playing 
-		 * @return 
-		 * 
-		 */		
-		public function get isPlaying () : Boolean 
-		{
-			return _isPlaying; 
-		}
-
-		public function set isPlaying ( p_isPlaying : Boolean ) : void 
-		{ 
-			_isPlaying = p_isPlaying;
-			draw();
-		}
-		
-		/**
-		 * Is the audio player transitioning between resume/pause 
-		 * @return 
-		 * 
-		 */		
-		public function get isTransitioning () : Boolean 
-		{
-			return _isTransitioning; 
-		}
-
-		public function set isTransitioning ( p_isTransitioning : Boolean ) : void 
-		{ 
-			_isTransitioning = p_isTransitioning; 
-		}
-		
-		/**
-		 * Has the audio player been manually paused 
-		 * @return 
-		 * 
-		 */		
-		public function get isManualPause () : Boolean 
-		{
-			return _isManualPause; 
-		}
-
-		public function set isManualPause ( p_isManualPause : Boolean ) : void 
-		{ 
-			_isManualPause = p_isManualPause; 
-		}
-		
-		/**
-		 * Has the audio player been initialized 
-		 * @return 
-		 * 
-		 */		
-		public function get isInitialized () : Boolean 
-		{
-			return _isInitialized; 
-		}
-
-		public function set isInitialized ( p_isInitialized : Boolean ) : void 
-		{ 
-			_isInitialized = p_isInitialized; 
-		}
-		
-		
-		//--------------------------------------
-		//  PROTECTED METHODS
-		//--------------------------------------
-		protected function init () : void
-		{
-			setDefaults();
-			addListeners();
-			
-			isInitialized = true;
-		}
-		
-		protected function setDefaults():void
-		{
-		
-			TweenPlugin.activate([AutoAlphaPlugin, VolumePlugin]);
-			
-			this.alpha = 1;
-			
-			this.mouseChildren = false;
-			this.buttonMode = true;
-			
-			_sound = new Sound();
-            _sound.addEventListener(Event.ID3, id3Handler);
-            _sound.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
-            _sound.addEventListener(ProgressEvent.PROGRESS, progressHandler);
-            
-			_transform = new SoundTransform(_volume);
-		}
-		
-		protected function addListeners () : void
-		{
-			this.addEventListener(MouseEvent.CLICK, clickHandler, false, 0, true);
-			this.addEventListener(MouseEvent.MOUSE_OVER, mouseOverHandler, false, 0, true);
-			this.addEventListener(MouseEvent.MOUSE_OUT, mouseOutHandler, false, 0, true);
-		}
-		
-		protected function removeListeners () : void
-		{
-			this.removeEventListener(MouseEvent.CLICK, clickHandler, false);
-			this.removeEventListener(MouseEvent.MOUSE_OVER, mouseOverHandler, false);
-			this.removeEventListener(MouseEvent.MOUSE_OUT, mouseOutHandler, false);
-			
-			try{
-				_sound.removeEventListener(Event.ID3, id3Handler);
-           		_sound.removeEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
-            	_sound.removeEventListener(ProgressEvent.PROGRESS, progressHandler);
-			}catch(e:Error){}	
-		}
-		
-		protected function loadMusic () : void
-		{
-			killAllSounds();
-			var request:URLRequest = new URLRequest(_source);
-            _sound.load(request);
-            resume();
-		}
-		
-		protected function pauseComplete () : void
-		{
-			recordAndKillSound();
-			isTransitioning = false;
-			isPlaying = false;
-		}
-		
-		protected function resumeComplete () : void
-		{
-			isTransitioning = false;
-			isPlaying = true;
-		}
-		
-		protected function recordAndKillSound () : void
-		{
-			killAllSounds();	
-		}
-		
-		protected function killAllSounds () : void
-		{			
-			try{
-				_soundChannel.stop();
-				_soundChannel = null;
-				_soundChannel.removeEventListener(Event.SOUND_COMPLETE, soundCompleteHandler, false);
-			}catch(e:Error){}
-		}
-		
-		protected function draw () : void
-		{
-			//Override
-		}
-		
-		//--------------------------------------
-		//  HANDLER METHODS
-		//--------------------------------------
-		protected function clickHandler ( e : MouseEvent ) : void
-		{
-			toggle();
-		}
-		
-		protected function mouseOverHandler ( e : MouseEvent ) : void
-		{
-			//Override
-		}
-		
-		protected function mouseOutHandler ( e : MouseEvent ) : void
-		{
-			//Override
-		}
-
-        protected function soundCompleteHandler(event:Event):void {
-			isPlaying = false;
-			isTransitioning = false;
-			resume();
-        }
-
-        protected function id3Handler(event:Event):void {
-            //trace("id3Handler: " + event);
-        }
-
-        protected function ioErrorHandler(event:Event):void {
-            //trace("ioErrorHandler: " + event);
-        }
-
-        protected function progressHandler(event:ProgressEvent):void {
-            //trace("progressHandler: " + event);
-        }
-		
-	}
-}
+﻿package bangfe.simpleaudioplayer{	import bangfe.core.ICoreObject;		import com.greensock.TweenMax;	import com.greensock.events.LoaderEvent;	import com.greensock.loading.MP3Loader;	import com.greensock.plugins.AutoAlphaPlugin;	import com.greensock.plugins.TweenPlugin;	import com.greensock.plugins.VolumePlugin;		import flash.display.MovieClip;	import flash.events.Event;	import flash.events.IOErrorEvent;	import flash.events.MouseEvent;	import flash.events.ProgressEvent;	import flash.media.Sound;	import flash.media.SoundChannel;	import flash.media.SoundTransform;	import flash.net.URLRequest;		import org.osflash.signals.Signal;		/**	 * Simple audio player. Toggle and volume. Great for background music	 * @author Will Zadikian	 * 	 */		public class SimpleAudioPlayer implements ICoreObject	{				//--------------------------------------		//  STATE CONSTANTS		//--------------------------------------				/**		 * State during playback 		 */				public static const PLAYING_STATE : String = "__playingState__";				/**		 * State during pause 		 */				public static const PAUSED_STATE : String = "__pausedState__";				//--------------------------------------		//  SIGNALS		//--------------------------------------		/**		 * Signal - Sent when the play state changes 		 */				public var stateChangedSignal : Signal = new Signal(String);				/**		 * Signal - Sent when the isReady property changes 		 */				public var isReadyChangedSignal : Signal = new Signal(Boolean);				//--------------------------------------		//  PROTECTED VARIABLES		//--------------------------------------		private var _source : String;		private var _state : String = PAUSED_STATE;		private var _sound : MP3Loader;		private var _volume : Number = .8;		private var _lastPositon : Number = 0;		private var _isPlaying : Boolean = false;		private var _isManualPause : Boolean = false;		private var _isTransitioning : Boolean = false;				private var _isReady : Boolean = false;				//--------------------------------------		//  PUBLIC METHODS		//--------------------------------------				/**		 * Constructor 		 * 		 */				public function SimpleAudioPlayer()		{			init();		}				public function destroy () : void		{			killAllAudio();						stateChangedSignal.removeAll();			isReadyChangedSignal.removeAll();		}				/**		 * Toggle audio play/pause		 * 		 */				public function toggle () : void		{			if(isPlaying){				pause();			}else{				resume();			}		}				/**		 * Restart the audio 		 * @param p_manualResume		 * 		 */				public function restart ( p_manualResume : Boolean = true ) : void		{			if(!_source)return;						if(p_manualResume)isManualPause = false;						if(isManualPause)return;						if(!_sound)return;						_sound.soundTime = 0;			_sound.playSound();						TweenMax.to(_sound, 1, {volume:_volume});						state = PLAYING_STATE;		}				/**		 * Pause audio		 * @param p_manualPause		 * 		 */				public function pause ( p_manualPause : Boolean = true ) : void		{			if(!_source)return;						if(!isPlaying)return;				if(p_manualPause)isManualPause = p_manualPause;						if(!_sound)return;						TweenMax.to(_sound, 1, {volume:0, onComplete:pauseComplete});						state = PAUSED_STATE;		}				/**		 * Resume audio 		 * @param p_manualResume		 * 		 */				public function resume ( p_manualResume : Boolean = true ) : void		{			if(!_source)return;						if(isPlaying)return;						if(isTransitioning)return;						if(p_manualResume)isManualPause = false;						if(isManualPause)return;						if(!_sound)return;						_sound.soundPaused = false;			TweenMax.to(_sound, 1, {volume:_volume});						state = PLAYING_STATE;		}				//--------------------------------------		//  ACCESSOR METHODS		//--------------------------------------				public function get state () : String		{			return _state;		}		public function set state ( p_state : String ) : void		{			if(_state == p_state)return;						_state = p_state;						//Dispatch the state change			stateChangedSignal.dispatch(_state);		}				/**		 * Source url for current audio 		 * @return 		 * 		 */				public function get source () : String 		{			return _source; 		}		public function set source ( p_source : String ) : void 		{ 			if(_source == p_source)return;			_source = p_source;			loadAudio();		}				/**		 * Volume of audio 		 * @return 		 * 		 */				public function get volume () : Number 		{			return _volume; 		}		public function set volume ( p_volume : Number ) : void 		{			_volume = p_volume;			if(_sound && isPlaying)TweenMax.to(_sound, 1, {volume:_volume});		}				/**		 * Is the audio player currently playing 		 * @return 		 * 		 */				public function get isPlaying () : Boolean 		{			return (state == PLAYING_STATE); 		}				/**		 * Is the audio player transitioning between resume/pause 		 * @return 		 * 		 */				public function get isTransitioning () : Boolean 		{			return _isTransitioning; 		}		public function set isTransitioning ( p_isTransitioning : Boolean ) : void 		{ 			_isTransitioning = p_isTransitioning; 		}				/**		 * Has the audio player been manually paused 		 * @return 		 * 		 */				public function get isManualPause () : Boolean 		{			return _isManualPause; 		}		public function set isManualPause ( p_isManualPause : Boolean ) : void 		{ 			_isManualPause = p_isManualPause; 		}				/**		 * Has the sound fully loaded and is ready for playback 		 * @return 		 * 		 */				public function get isReady () : Boolean		{			return _isReady;		}				//--------------------------------------		//  PROTECTED METHODS		//--------------------------------------		private function init () : void		{			setDefaults();		}				private function setDefaults():void		{			TweenPlugin.activate([VolumePlugin]);		}				private function addSoundListeners () : void		{			_sound.addEventListener(MP3Loader.SOUND_PLAY, soundPlayHandler, false, 0, true);			_sound.addEventListener(MP3Loader.SOUND_PAUSE, soundPauseHandler, false, 0, true);			_sound.addEventListener(MP3Loader.SOUND_COMPLETE, soundCompleteHandler, false, 0, true);		}				private function removeSoundListeners () : void		{			try{				_sound.removeEventListener(MP3Loader.SOUND_PLAY, soundPlayHandler);				_sound.removeEventListener(MP3Loader.SOUND_PAUSE, soundPauseHandler);				_sound.removeEventListener(MP3Loader.SOUND_COMPLETE, soundCompleteHandler);			}catch(e:Error){}			}				private function loadAudio () : void		{			killAllAudio();			_sound = new MP3Loader(source, {																	autoPlay:true, 																	volume:volume, 																	//repeat:-1,																	onOpen:loaderStartedHandler, 																	onProgress:loaderProgressHandler, 																	onComplete:loaderCompletedHandler																});						addSoundListeners();						_sound.load();		}				private function pauseComplete () : void		{			//_lastPositon = _sound.soundTime;			//_sound.pauseSound();			_sound.soundPaused = true;		}				private function killAllAudio () : void		{						if(_sound){				removeSoundListeners();				_sound.dispose();			}		}				private function setIsReady ( p_isReady : Boolean ) : void		{			if(_isReady == p_isReady)return;						_isReady = p_isReady;						if(!_isReady)state = PAUSED_STATE;						isReadyChangedSignal.dispatch(_isReady);		}				//--------------------------------------		//  HANDLER METHODS		//--------------------------------------		private function soundPlayHandler ( e : LoaderEvent ) : void		{			state = PLAYING_STATE;		}				private function soundPauseHandler ( e : LoaderEvent ) : void		{			state = PAUSED_STATE;		}				private function soundCompleteHandler ( e : LoaderEvent ) : void		{			restart();		}				private function loaderStartedHandler ( e : LoaderEvent ) : void		{			setIsReady(false);		}				private function loaderProgressHandler ( e : LoaderEvent ) : void		{			setIsReady(false);		}				private function loaderCompletedHandler ( e : LoaderEvent ) : void		{			setIsReady(true);		}			}}

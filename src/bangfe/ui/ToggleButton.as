@@ -107,8 +107,8 @@ package bangfe.ui
 		//--------------------------------------
 		override protected function setGlobalDefaults () : void
 		{
-			if(onIcon)onIcon.visible = true;
-			if(offIcon)offIcon.visible = false;
+			if(onIcon)onIcon.visible = false;
+			if(offIcon)offIcon.visible = true;
 			super.setGlobalDefaults();
 		}
 		

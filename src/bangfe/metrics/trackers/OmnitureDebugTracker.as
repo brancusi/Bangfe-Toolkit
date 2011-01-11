@@ -29,7 +29,7 @@ package bangfe.metrics.trackers
 		 * Constructor
 		 * 
 		 */
-		public function OmnitureDebugTracker()
+		public function OmnitureDebugTracker() : void
 		{
 		}
 		
