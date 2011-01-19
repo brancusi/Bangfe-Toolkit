@@ -7,6 +7,14 @@ package bangfe.ui
 	
 	import org.osflash.signals.Signal;
 
+	/**
+	 * A simple toggle button. Requires two stage instances:
+	 * 		1) onIcon
+	 * 		2) offIcon
+	 *  
+	 * @author Will Zadikian
+	 * 
+	 */	
 	public class ToggleButton extends BasicButton
 	{
 		
@@ -21,6 +29,7 @@ package bangfe.ui
 		//--------------------------------------
 		public var onRequestedSignal : Signal = new Signal();
 		public var offRequestedSignal : Signal = new Signal();
+		public var stateChangedSignal : Signal = new Signal(String);
 		
 		//--------------------------------------
 		//  STAGE INSTANCES
@@ -56,6 +65,7 @@ package bangfe.ui
 			showOnState();
 			
 			if(p_dispatch)onRequestedSignal.dispatch();
+			if(p_dispatch)stateChangedSignal.dispatch(state);
 		}
 		
 		public function setOff ( p_dispatch : Boolean = true ) : void
@@ -66,11 +76,27 @@ package bangfe.ui
 			showOffState();
 			
 			if(p_dispatch)offRequestedSignal.dispatch();
+			if(p_dispatch)stateChangedSignal.dispatch(state);
+		}
+		
+		/**
+		 * Is the toggle currently on 
+		 * @return 
+		 * 
+		 */		
+		public function isOn () : Boolean
+		{
+			return (state == ON);
 		}
 		
 		//--------------------------------------
 		//  ACCESSOR/MUTATOR METHODS
 		//--------------------------------------
+		/**
+		 * Current state of the toggle. ToggleButton.ON or ToggleButton.OFF 
+		 * @return 
+		 * 
+		 */
 		public function get state () : String
 		{
 			return _currentState;
@@ -81,8 +107,8 @@ package bangfe.ui
 		//--------------------------------------
 		override protected function setGlobalDefaults () : void
 		{
-			onIcon.visible = true;
-			offIcon.visible = false;
+			if(onIcon)onIcon.visible = false;
+			if(offIcon)offIcon.visible = true;
 			super.setGlobalDefaults();
 		}
 		
@@ -100,14 +126,14 @@ package bangfe.ui
 		
 		protected function showOnState () : void
 		{
-			TweenMax.to(onIcon, .25, {autoAlpha:0});
-			TweenMax.to(offIcon, .25, {autoAlpha:1});
+			if(onIcon)TweenMax.to(onIcon, .25, {autoAlpha:1});
+			if(offIcon)TweenMax.to(offIcon, .25, {autoAlpha:0});
 		}
 		
 		protected function showOffState () : void
 		{
-			TweenMax.to(onIcon, .25, {autoAlpha:1});
-			TweenMax.to(offIcon, .25, {autoAlpha:0});
+			if(onIcon)TweenMax.to(onIcon, .25, {autoAlpha:0});
+			if(offIcon)TweenMax.to(offIcon, .25, {autoAlpha:1});
 		}
 		
 		//--------------------------------------

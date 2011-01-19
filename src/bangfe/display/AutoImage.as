@@ -30,6 +30,12 @@ package bangfe.display
 	[Event(name="imageTransitioning", type="bangfe.display.AutoImage")]
 	
 	/**
+	 * Dispatched in the event of a load error
+	 * @eventType bangfe.display.AutoImage.LOAD_ERROR
+	 */
+	[Event(name="loadError", type="bangfe.display.AutoImage")]
+	
+	/**
 	 * Simple image class. Takes a url and loads the image.
 	 * 
 	 */	
@@ -48,6 +54,11 @@ package bangfe.display
 		 * Image Transitioning event name
 		 */
 		public static const IMAGE_TRANSITIONING : String = "imageTransitioning";
+		
+		/**
+		 * Loading Error event name
+		 */
+		public static const LOAD_ERROR : String = "loadError";
 		
 		/**
 		 * The image should fill the area difined width and height.
@@ -123,6 +134,8 @@ package bangfe.display
 			TweenLite.to(this, .25, {alpha:0, onUpdate:notifyTransitionChange, onComplete:function():void{
 				if(parent)parent.removeChild(this);
 			}});
+			
+			_url = null
 		}
 		
 		public function clearImages () : void
@@ -130,6 +143,8 @@ package bangfe.display
 			TweenLite.to(this, .25, {alpha:0, onUpdate:notifyTransitionChange, onComplete:function():void{
 				_container.graphics.clear();
 			}});
+			
+			_url = null
 		}
 		
 		//--------------------------------------
@@ -210,6 +225,7 @@ package bangfe.display
 
 		public function set url ( p_url : String ) : void
 		{
+			if(p_url == null || p_url == "")clearImages();
 			if(_url == p_url)return;
 			_url = p_url;
 			_extensionArray = EXTENSIONS_ARRAY.slice();
@@ -323,7 +339,6 @@ package bangfe.display
 			
 			var context : LoaderContext = new LoaderContext();
 			
-			//context.securityDomain = SecurityDomain.currentDomain; 
 			context.applicationDomain = ApplicationDomain.currentDomain; 
 			context.checkPolicyFile = true;
 			
@@ -399,6 +414,7 @@ package bangfe.display
 		{
 			if(_extensionArray.length < 1){
 				trace("There was no image found with URI: " + uri, "\n", "Attempted to use the following extensions : ", EXTENSIONS_ARRAY.toString());
+				dispatchEvent(new Event(AutoImage.LOAD_ERROR));
 				return;
 			}
 			

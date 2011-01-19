@@ -6,7 +6,7 @@ package bangfe.metrics.trackers
 	 * 
 	 * @author Will Zadikian
 	 */	
-	public interface IOmnitureTracker
+	public interface IOmnitureTracker extends IMetricsTracker
 	{
 		
 		//--------------------------------------
@@ -68,12 +68,6 @@ package bangfe.metrics.trackers
 		//  ACCESSOR/MUTATOR METHODS
 		//--------------------------------------
 		
-		/**
-		 * Should track in debug mode. Will trace back information 
-		 * @return 
-		 * 
-		 */
-		function get debugMode () : Boolean;
-		function set debugMode ( p_debugMode : Boolean ) : void;
+		
 	}
 }

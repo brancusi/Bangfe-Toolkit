@@ -36,6 +36,9 @@ package bangfe.display
 		 */
 		public function MacPreloader(p_innerRadius:uint = 6, p_outerRadius:uint = 12, p_numberOfSegements:uint = 12)
 		{
+			this.visible = false;
+			this.alpha = 0;
+			
 			_innerRadius = p_innerRadius; 
 			_outerRadius = p_outerRadius; 
 			_numberOfSegments = p_numberOfSegements; 
@@ -45,7 +48,7 @@ package bangfe.display
 			draw();
 		}
 			
-		public function starSpin () : void
+		public function startSpin () : void
 		{
 			addEventListener(Event.ENTER_FRAME, rotateCircle, false, 0, true);
 			TweenMax.to(this, .25, {autoAlpha:1});
