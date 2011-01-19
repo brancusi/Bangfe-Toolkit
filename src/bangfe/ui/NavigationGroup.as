@@ -128,6 +128,8 @@ package bangfe.ui
 		 */
 		public function selectNavigationItem ( p_navigationItem : NavigationItem, p_dispatchChange : Boolean = true ) : void
 		{
+			if(_selectedNavigationItem == p_navigationItem)return;
+			
 			var it : Iterator = _navigationItemCollection.iterator();
 			
 			while(it.hasNext()){
@@ -149,6 +151,8 @@ package bangfe.ui
 		 */
 		public function selectNavigationUID ( p_uid : String, p_dispatchChange : Boolean = true ) : void
 		{
+			if(_selectedNavigationItem != null)if(_selectedNavigationItem.uid == p_uid)return;
+			
 			var it : Iterator = _navigationItemCollection.iterator();
 			
 			while(it.hasNext()){
@@ -170,6 +174,8 @@ package bangfe.ui
 		 */
 		public function selectNavigationIndex ( p_index : int, p_dispatchChange : Boolean = true ) : void
 		{
+			if(_selectedNavigationItem != null)if(_navigationItemCollection.indexOf(_selectedNavigationItem) == p_index)return;
+			
 			var it : Iterator = _navigationItemCollection.iterator();
 			
 			while(it.hasNext()){
@@ -207,6 +213,8 @@ package bangfe.ui
 		
 		private function setNavigationItemSelected ( p_navigationItem : NavigationItem, p_dispatchChange : Boolean = true) : void
 		{
+			if(_selectedNavigationItem == p_navigationItem)return;
+			
 			_selectedNavigationItem = p_navigationItem;
 			_selectedNavigationItem.setSelected(p_dispatchChange);
 			

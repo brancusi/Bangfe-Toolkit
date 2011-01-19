@@ -19,7 +19,7 @@ package
 			testButton1.label = "Button 1";
 			testButton2.label = "Button 2";
 			
-			testButton1.navigationGroup = this.navigationGroup;
+			//testButton1.navigationGroup = this.navigationGroup;
 		}
 		
 	}
