@@ -1,17 +1,13 @@
 package bangfe.core
 {
 	
-	import flash.display.DisplayObject;
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	
 	/**
-	 * A core level movieclip object. Handles basic cleanup, data, draw, defaulting mechanisms.
-	 * This can be used as the base class for any <code>DisplayObject</code> including document classes
-	 * 
-	 * This has the same logic as CoreDisplayObject except that it extends MovieClip. Use whenever a timeline is needed
-	 *  
+	 * A core level display object. Handles basic cleanup, data, draw, defaulting mechanisms.
+	 * This can be used as the base class for any <code>DisplayObject</code> including document classes 
 	 * @author Will Zadikian
 	 * 
 	 */
@@ -21,9 +17,6 @@ package bangfe.core
 		//  PRIVATE VARIABLES
 		//--------------------------------------
 		private var _isDestroyed : Boolean = false;
-		private var _isRemoved : Boolean = false;
-		private var _autoDestroy : Boolean = true;
-		
 		private var _data : *;
 		
 		//--------------------------------------
@@ -33,7 +26,7 @@ package bangfe.core
 		 * Constructor 
 		 * 
 		 */
-		public function CoreMovieClipObject()
+		public function CoreDisplayObject() : void
 		{
 			init();
 		}
@@ -46,17 +39,10 @@ package bangfe.core
 			
 			removeInternalListeners();
 			removeGlobalListeners();
-			removeGlobalStageListeners();
 			removeListeners();
-			removeStageListeners();
 			
-			if(parent && !isRemoved)parent.removeChild(this);
+			if(parent != null)parent.removeChild(this);
 			
-			//Recurisvly destroy children
-			for (var i : int = this.numChildren-1; i > 0; i--){
-				var child : DisplayObject = this.getChildAt(i);
-				if(child is CoreDisplayObject)CoreDisplayObject(child).destroy();
-			}
 		}
 		
 		/**
@@ -70,29 +56,7 @@ package bangfe.core
 		
 		//--------------------------------------
 		//  ACCESSOR/MUTATOR METHODS
-		//--------------------------------------
-		/**
-		 * Should this CoreDisplayObject be automatically destroyed when removed from the stage .
-		 * When value is manually set, it will cascade to children
-		 * @return 
-		 * 
-		 */
-		public function get autoDestroy () : Boolean
-		{
-			return _autoDestroy;
-		}
-		
-		public function set autoDestroy ( p_autoDestroy : Boolean ) : void
-		{
-			_autoDestroy = p_autoDestroy;
-			
-			var childCount : int = this.numChildren;
-			for (var i : int = 0; i < childCount; i++){
-				var child : DisplayObject = this.getChildAt(i);
-				if(child is CoreDisplayObject)CoreDisplayObject(child).autoDestroy = _autoDestroy;
-			}
-		}
-		
+		//--------------------------------------		
 		/**
 		 * Was this CoreDisplayObject destroyed 
 		 * @return 
@@ -101,16 +65,6 @@ package bangfe.core
 		public function get isDestroyed () : Boolean
 		{
 			return _isDestroyed;
-		}
-		
-		/**
-		 * Has this CoreDisplayObject been removed from the stage 
-		 * @return 
-		 * 
-		 */		
-		public function get isRemoved () : Boolean
-		{
-			return _isRemoved;
 		}
 		
 		/**
@@ -163,31 +117,21 @@ package bangfe.core
 		}
 		
 		/**
-		 * Use to add stage global listeners. This can be used by abstract classes.
-		 * For subclasses, use addListeners
-		 * 
-		 */		
-		protected function addGlobalStageListeners () : void
-		{
-			//Override	
-		}
-		
-		/**
-		 * Use to remove global stage listeners. This can be used by abstract classes 
-		 * 
-		 */
-		protected function removeGlobalStageListeners () : void
-		{
-			//Override
-		}
-		
-		/**
 		 * Set defaults in concrete class 
 		 * 
 		 */
 		protected function setDefaults () : void
 		{
 			//Override	
+		}
+		
+		/**
+		 * Map signals. This can be used to map native events to signals 
+		 * 
+		 */		
+		protected function mapSignals () : void
+		{
+			//Override
 		}
 		
 		/**
@@ -209,19 +153,10 @@ package bangfe.core
 		}
 		
 		/**
-		 * Add stage listeners in concrete class 
+		 * Gets called after init. This can be used by abstract classes
 		 * 
-		 */
-		protected function addStageListeners () : void
-		{
-			//Override
-		}
-		
-		/**
-		 * Remove stage listeners in concrete class 
-		 * 
-		 */
-		protected function removeStageListeners () : void
+		 */		
+		protected function postInitGlobal () : void
 		{
 			//Override
 		}
@@ -240,6 +175,15 @@ package bangfe.core
 		 * 
 		 */		
 		protected function postAddedToStage () : void
+		{
+			//Override
+		}
+		
+		/**
+		 * Gets called once the display object is removed from stage 
+		 * 
+		 */		
+		protected function postRemovedFromStage () : void
 		{
 			//Override
 		}
@@ -271,7 +215,9 @@ package bangfe.core
 			setGlobalDefaults();
 			addGlobalListeners();
 			setDefaults();
+			mapSignals();
 			addListeners();
+			postInitGlobal();
 			postInit();
 		}
 		
@@ -292,20 +238,12 @@ package bangfe.core
 		//--------------------------------------
 		private function addedToStageHandler ( e : Event ) : void
 		{
-			//Remove added to stage listener. Protects against recalling addStageListeners and addGlobalStageListeners
-			removeEventListener(Event.ADDED_TO_STAGE, addedToStageHandler);
-			
 			postAddedToStage();
-			addGlobalStageListeners();
-			addStageListeners();
 		}
 		
 		private function removedFromStageHandler ( e : Event ) : void
 		{
-			if(autoDestroy){
-				_isRemoved = true;
-				destroy();
-			}
+			postRemovedFromStage();
 		}
 		
 	}

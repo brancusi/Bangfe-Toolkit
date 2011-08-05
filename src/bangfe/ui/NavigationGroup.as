@@ -190,6 +190,22 @@ package bangfe.ui
 			}
 		}
 		
+		/**
+		 * Deselect all navigation items 
+		 * 
+		 */		
+		public function deselectAll () : void
+		{
+			_selectedNavigationItem = null;
+			
+			var it : Iterator = _navigationItemCollection.iterator();
+			
+			while(it.hasNext()){
+				var item : NavigationItem = it.next() as NavigationItem;
+				item.deSelect();
+			}
+		}
+		
 		//--------------------------------------
 		//  ACCESSOR METHODS
 		//--------------------------------------
