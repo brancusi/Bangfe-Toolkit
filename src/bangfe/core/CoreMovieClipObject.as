@@ -1,7 +1,6 @@
 package bangfe.core
 {
 	
-	import flash.display.MovieClip;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	
@@ -11,7 +10,7 @@ package bangfe.core
 	 * @author Will Zadikian
 	 * 
 	 */
-	public class CoreMovieClipObject extends MovieClip implements ICoreObject
+	public class CoreMovieClipObject extends Sprite implements ICoreObject
 	{
 		//--------------------------------------
 		//  PRIVATE VARIABLES
@@ -26,7 +25,7 @@ package bangfe.core
 		 * Constructor 
 		 * 
 		 */
-		public function CoreDisplayObject() : void
+		public function CoreMovieClipObject() : void
 		{
 			init();
 		}
@@ -42,16 +41,6 @@ package bangfe.core
 			removeListeners();
 			
 			if(parent != null)parent.removeChild(this);
-			
-		}
-		
-		/**
-		 * Realign the elements of this module 
-		 * 
-		 */
-		public function reAlign () : void
-		{
-			//Override
 		}
 		
 		//--------------------------------------
