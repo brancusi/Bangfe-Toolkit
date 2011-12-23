@@ -1,6 +1,5 @@
 package bangfe.display
 {
-	import com.greensock.TweenLite;
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -16,24 +15,8 @@ package bangfe.display
 	import flash.system.ApplicationDomain;
 	import flash.system.LoaderContext;
 	import flash.system.SecurityDomain;
-
-	 /**
-	 * Dispatched once image has loaded and is added to the stage
-	 * @eventType bangfe.display.AutoImage.IMAGE_READY
-	 */
-	[Event(name="imageReady", type="bangfe.display.AutoImage")]
 	
-	 /**
-	 * Dispatched during onUpdate tween event
-	 * @eventType bangfe.display.AutoImage.IMAGE_TRANSITIONING
-	 */
-	[Event(name="imageTransitioning", type="bangfe.display.AutoImage")]
-	
-	/**
-	 * Dispatched in the event of a load error
-	 * @eventType bangfe.display.AutoImage.LOAD_ERROR
-	 */
-	[Event(name="loadError", type="bangfe.display.AutoImage")]
+	import org.osflash.signals.Signal;
 	
 	/**
 	 * Simple image class. Takes a url and loads the image.
@@ -81,40 +64,31 @@ package bangfe.display
 		public static const NO_SCALE : String = "noScale";
 		
 		//--------------------------------------
-		//  PROTECTED VARIABLES
+		//  PRIVATE VARIABLES
 		//--------------------------------------
-		protected var _url : String;
-		
-		protected var _imageLoader : Loader;
-		
-		protected var _borderColor : Number = 0x000000;
-		
-		protected var _fillColor : Number = 0x000000;
-		
-		protected var _imageWidth : Number;
-		
-		protected var _imageHeight : Number;
-		
-		protected var _drawBorder : Boolean = false;
-		
-		protected var _container : Sprite = new Sprite();
-		
-		protected var _scaleType : String = "noScale";
-		
-		protected var _currentBitmap : Bitmap;
-		
-		protected var _extensionArray : Array;
+		private var _url : String;
+		private var _imageLoader : Loader;	
+		private var _imageWidth : Number;
+		private var _imageHeight : Number;
+		private var _drawBorder : Boolean = false;
+		private var _container : Sprite = new Sprite();
+		private var _scaleType : String = FILL;
+		private var _bitmap : Bitmap;
+		private var _extensionArray : Array;
+		private var _readySignal : Signal = new Signal(AutoImage);
+		private var _errorSignal : Signal = new Signal(AutoImage);
 		
 		//--------------------------------------
 		//  PUBLIC METHODS
 		//--------------------------------------
-		
 		/**
 		 * Constructor 
-		 * @param p_url
+		 * @param width The width of the image
+		 * @param height The height of the image
+		 * @param scaleType Scale type
 		 * 
 		 */		
-		public function AutoImage ( width : Number = 100, height : Number = 100, scaleType : String = FIT )
+		public function AutoImage ( width : Number = 100, height : Number = 100, scaleType : String = FILL )
 		{	
 			setDefaults();
 			addListeners();
@@ -131,19 +105,17 @@ package bangfe.display
 		public function destroy () : void
 		{
 			removeListeners();
-			TweenLite.to(this, .25, {alpha:0, onUpdate:notifyTransitionChange, onComplete:function():void{
-				if(parent)parent.removeChild(this);
-			}});
-			
+			if(parent)parent.removeChild(this);
 			_url = null
 		}
 		
+		/**
+		 * Clear out old images 
+		 * 
+		 */		
 		public function clearImages () : void
 		{
-			TweenLite.to(this, .25, {alpha:0, onUpdate:notifyTransitionChange, onComplete:function():void{
-				_container.graphics.clear();
-			}});
-			
+			_container.graphics.clear();
 			_url = null
 		}
 		
@@ -160,24 +132,12 @@ package bangfe.display
 		{
 			return _imageWidth; 
 		}
-
+		
 		override public function set width ( value : Number ) : void 
 		{ 
 			if(_imageWidth == value)return;
 			_imageWidth = value;
 			generateImage();
-		}
-		
-		public function get rawWidth () : Number
-		{
-			if(currentBitmap)return currentBitmap.width; 
-			return this.width;
-		}
-		
-		public function get rawHeight () : Number
-		{
-			if(currentBitmap)return currentBitmap.height; 
-			return this.height;
 		}
 		
 		/**
@@ -189,7 +149,7 @@ package bangfe.display
 		{
 			return _imageHeight; 
 		}
-
+		
 		override public function set height ( value : Number ) : void 
 		{ 
 			if(_imageHeight == value)return;
@@ -198,19 +158,20 @@ package bangfe.display
 		}
 		
 		/**
-		 * Should the autoimage draw a border 
+		 * The raw bitmap width 
 		 * @return 
 		 * 
 		 */		
-		public function get drawBorder () : Boolean 
+		public function get rawWidth () : Number
 		{
-			return _drawBorder; 
+			if(bitmap)return bitmap.width; 
+			return this.width;
 		}
-
-		public function set drawBorder ( p_drawBorder : Boolean ) : void 
-		{ 
-			_drawBorder = p_drawBorder;
-			generateImage(); 
+		
+		public function get rawHeight () : Number
+		{
+			if(bitmap)return bitmap.height; 
+			return this.height;
 		}
 		
 		/**
@@ -222,7 +183,7 @@ package bangfe.display
 		{
 			return _url;
 		}
-
+		
 		public function set url ( p_url : String ) : void
 		{
 			if(p_url == null || p_url == "")clearImages();
@@ -257,7 +218,7 @@ package bangfe.display
 		{
 			return _scaleType;
 		}
-
+		
 		public function set scaleType ( p_scaleType : String ) : void
 		{
 			_scaleType = p_scaleType;
@@ -279,37 +240,51 @@ package bangfe.display
 		 * @return 
 		 * 
 		 */
-		public function get currentBitmap () : Bitmap
+		public function get bitmap () : Bitmap
 		{
-			return _currentBitmap;
+			return _bitmap;
 		}
 		
-		public function set currentBitmap ( p_bitmap : Bitmap ) : void
+		public function set bitmap ( p_bitmap : Bitmap ) : void
 		{
-			_currentBitmap = p_bitmap;
-			_currentBitmap.smoothing = true;
-			TweenLite.to(this, .25, {alpha:0, onComplete:generateImage, onUpdate:notifyTransitionChange});
+			_bitmap = p_bitmap;
+			_bitmap.smoothing = true;
+			generateImage();
 		}
 		
 		/**
-		 * Fill color 
+		 * Signal - Dispatched when the image has loaded
+		 * 
+		 * Handlers must accept the following params:
+		 * 
+		 * 1) AutoImage - The <code>AutoImage</code> that triggered the complete event 
+		 * 
 		 * @return 
 		 * 
 		 */		
-		public function get fillColor () : Number
+		public function get readySignal () : Signal 
 		{
-			return _fillColor;
+			return _readySignal;
 		}
-
-		public function set fillColor ( p_fillColor : Number ) : void
+		
+		/**
+		 * Signal - Dispatched when the image load has failed
+		 * 
+		 * Handlers must accept the following params:
+		 * 
+		 * 1) AutoImage - The <code>AutoImage</code> that triggered the load error 
+		 * @return 
+		 * 
+		 */		
+		public function get errorSignal () : Signal 
 		{
-			_fillColor = p_fillColor;
+			return _errorSignal;
 		}
 		
 		//--------------------------------------
-		//  PROTECTED METHODS
+		//  PRIVATE METHODS
 		//--------------------------------------
-		protected function setDefaults () : void
+		private function setDefaults () : void
 		{	
 			addChild(_container);
 			_imageLoader = new Loader();
@@ -320,21 +295,20 @@ package bangfe.display
 			_container.mouseChildren = false; 
 		}
 		
-		protected function addListeners () : void
+		private function addListeners () : void
 		{
 			imageLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, imageCompleteHandler, false, 0, true);
 			imageLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler, false, 0, true);
 		}
 		
-		protected function removeListeners () : void
+		private function removeListeners () : void
 		{
 			imageLoader.contentLoaderInfo.removeEventListener(Event.COMPLETE, imageCompleteHandler);
 			imageLoader.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
 		}
 		
-		protected function load () : void
+		private function load () : void
 		{
-			_container.graphics.clear();
 			var request : URLRequest = new URLRequest(url);
 			
 			var context : LoaderContext = new LoaderContext();
@@ -345,45 +319,44 @@ package bangfe.display
 			imageLoader.load(request, context);
 		}
 		
-		protected function generateImage () : void
+		private function generateImage () : void
 		{
-		
-			if(!currentBitmap)return;
+			if(!bitmap)return;
 			if(isNaN(width))width = imageLoader.width;
 			if(isNaN(height))height = imageLoader.height;
 			
-			currentBitmap.scaleX = currentBitmap.scaleY = 1;
-			currentBitmap.smoothing = true;
+			bitmap.scaleX = bitmap.scaleY = 1;
+			bitmap.smoothing = true;
 			
-			var widthFactor:Number = width/currentBitmap.width;
-			var heightFactor:Number = height/currentBitmap.height;
+			var widthFactor:Number = width/bitmap.width;
+			var heightFactor:Number = height/bitmap.height;
 			
 			switch(scaleType){
 				case FILL :
-					currentBitmap.scaleX = currentBitmap.scaleY = Math.max(widthFactor, heightFactor);
+					bitmap.scaleX = bitmap.scaleY = Math.max(widthFactor, heightFactor);
 					break;
 				case FIT :
-					currentBitmap.scaleX = currentBitmap.scaleY = Math.min(widthFactor, heightFactor);
+					bitmap.scaleX = bitmap.scaleY = Math.min(widthFactor, heightFactor);
 					break;
 				default:
 					//
-				break;
+					break;
 			}
 			
 			drawBitmap();
 		}
 		
-		protected function drawBitmap () : void
+		private function drawBitmap () : void
 		{
 			_container.graphics.clear();
 			
-			var tempWidth : Number = currentBitmap.width;
-			var tempHeight : Number = currentBitmap.height;
+			var tempWidth : Number = bitmap.width;
+			var tempHeight : Number = bitmap.height;
 			
 			switch(scaleType){
 				case NO_SCALE :
-					tempWidth = currentBitmap.width;
-					tempHeight = currentBitmap.height;
+					tempWidth = bitmap.width;
+					tempHeight = bitmap.height;
 					break;
 				default:
 					tempWidth = width;
@@ -392,29 +365,29 @@ package bangfe.display
 			}
 			
 			var matrix : Matrix = new Matrix();
-			matrix.tx = -(currentBitmap.width/2 - tempWidth/2);
-			matrix.ty = -(currentBitmap.height/2 - tempHeight/2);
-			var bitmapData : BitmapData = new BitmapData(tempWidth, tempHeight, true, fillColor);
+			matrix.tx = -(bitmap.width/2 - tempWidth/2);
+			matrix.ty = -(bitmap.height/2 - tempHeight/2);
+			var bitmapData : BitmapData = new BitmapData(tempWidth, tempHeight, true, 0x00000000);
 			
 			//Must add to container for draw to work
 			var tempContainer : Sprite = new Sprite();
-			tempContainer.addChild(currentBitmap);
+			tempContainer.addChild(bitmap);
 			
 			bitmapData.draw(tempContainer, matrix, null, null, null, true);
 			
 			_container.graphics.beginBitmapFill(bitmapData, null, false, true);
-			if(drawBorder)_container.graphics.lineStyle(1, _borderColor, 1, false, LineScaleMode.NONE, CapsStyle.NONE, JointStyle.MITER);
+			
 			_container.graphics.drawRect(0, 0, tempWidth, tempHeight);
 			_container.graphics.endFill();
 			
-			TweenLite.to(this, .25, {alpha:1, onUpdate:notifyTransitionChange, onComplete:notifyComplete});
+			notifyReady();
 		}
 		
 		private function attemptLoadAlternateExtension () : void
 		{
 			if(_extensionArray.length < 1){
 				trace("There was no image found with URI: " + uri, "\n", "Attempted to use the following extensions : ", EXTENSIONS_ARRAY.toString());
-				dispatchEvent(new Event(AutoImage.LOAD_ERROR));
+				_errorSignal.dispatch(this);
 				return;
 			}
 			
@@ -434,23 +407,18 @@ package bangfe.display
 		//--------------------------------------
 		protected function imageCompleteHandler ( e : Event ) : void
 		{
-			currentBitmap = Bitmap(imageLoader.content);
+			bitmap = Bitmap(imageLoader.content);
 		}
 		
-		protected function notifyTransitionChange () : void
+		protected function notifyReady () : void
 		{
-			dispatchEvent(new Event(IMAGE_TRANSITIONING));	
+			_readySignal.dispatch(this);
 		}
 		
-		protected function notifyComplete () : void
-		{
-			dispatchEvent(new Event(IMAGE_READY));
-		}
-			
 		protected function ioErrorHandler ( e : IOErrorEvent ) : void
 		{
 			attemptLoadAlternateExtension();
 		}
-
+		
 	}
 }
