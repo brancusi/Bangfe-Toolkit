@@ -1,4 +1,4 @@
-package bangfe.ui
+package bangfe.navigation
 {
 	
 	import bangfe.core.ICoreObject;
@@ -28,12 +28,12 @@ package bangfe.ui
 		/**
 		 * The signal dispatched when a <code>NavigationItem</code> is selected. 
 		 */		
-		public var itemSelectedSignal : Signal = new Signal(NavigationItem);
+		public var itemSelectedSignal : Signal = new Signal(INavigationItem);
 		
 		//--------------------------------------
 		//  PRIVATE VARIABLES
 		//--------------------------------------
-		private var _selectedNavigationItem : NavigationItem;
+		private var _selectedNavigationItem : INavigationItem;
 		private var _navigationItemCollection : ArrayCollection = new ArrayCollection();
 		
 		//--------------------------------------
@@ -54,7 +54,7 @@ package bangfe.ui
 		{
 			var it : Iterator = _navigationItemCollection.iterator();
 			while(it.hasNext()){
-				var item : NavigationItem = it.next() as NavigationItem;
+				var item : INavigationItem = it.next() as INavigationItem;
 				unregisterNavigationItem(item);
 				_navigationItemCollection.remove(item);
 			}
@@ -67,7 +67,7 @@ package bangfe.ui
 		 * @param p_navigationItem
 		 * 
 		 */		
-		public function registerNavigationItem ( p_navigationItem : NavigationItem ) : void
+		public function registerNavigationItem ( p_navigationItem : INavigationItem  ) : void
 		{
 			if(!_navigationItemCollection.contains(p_navigationItem)){
 				_navigationItemCollection.add(p_navigationItem);
@@ -86,7 +86,7 @@ package bangfe.ui
 		 */		
 		public function registerMultipleNavigationItems ( p_navigationItemCollection : Array ) : void
 		{
-			for each(var item : NavigationItem in p_navigationItemCollection){
+			for each(var item : INavigationItem  in p_navigationItemCollection){
 				registerNavigationItem(item);
 			}
 		}
@@ -96,7 +96,7 @@ package bangfe.ui
 		 * @param p_navigationItem
 		 * 
 		 */
-		public function unregisterNavigationItem ( p_navigationItem : NavigationItem ) : void
+		public function unregisterNavigationItem ( p_navigationItem : INavigationItem  ) : void
 		{
 			if(_navigationItemCollection.contains(p_navigationItem)){
 				removeItemListeners(p_navigationItem);
@@ -115,7 +115,7 @@ package bangfe.ui
 		 */	
 		public function unregisterMultipleNavigationItems ( p_navigationItemCollection : Array ) : void
 		{
-			for each(var item : NavigationItem in p_navigationItemCollection){
+			for each(var item : INavigationItem  in p_navigationItemCollection){
 				unregisterNavigationItem(item);
 			}
 		}
@@ -126,19 +126,19 @@ package bangfe.ui
 		 * @param p_navigationItem
 		 * 
 		 */
-		public function selectNavigationItem ( p_navigationItem : NavigationItem, p_dispatchChange : Boolean = true ) : void
+		public function selectNavigationItem ( p_navigationItem : INavigationItem , p_dispatchChange : Boolean = true ) : void
 		{
 			if(_selectedNavigationItem == p_navigationItem)return;
 			
 			var it : Iterator = _navigationItemCollection.iterator();
 			
 			while(it.hasNext()){
-				var item : NavigationItem = it.next() as NavigationItem;
+				var item : INavigationItem  = it.next() as INavigationItem ;
 				
 				if(item == p_navigationItem){
 					setNavigationItemSelected(item, p_dispatchChange);
 				}else{
-					item.deSelect();
+					item.setDeSelected();
 				}
 			}
 		}
@@ -156,12 +156,12 @@ package bangfe.ui
 			var it : Iterator = _navigationItemCollection.iterator();
 			
 			while(it.hasNext()){
-				var item : NavigationItem = it.next() as NavigationItem;
+				var item : INavigationItem  = it.next() as INavigationItem ;
 				
 				if(item.uid == p_uid){
 					setNavigationItemSelected(item, p_dispatchChange);
 				}else{
-					item.deSelect();
+					item.setDeSelected();
 				}
 			}
 		}
@@ -179,13 +179,13 @@ package bangfe.ui
 			var it : Iterator = _navigationItemCollection.iterator();
 			
 			while(it.hasNext()){
-				var item : NavigationItem = it.next() as NavigationItem;
+				var item : INavigationItem  = it.next() as INavigationItem ;
 				var index : int = _navigationItemCollection.indexOf(item);
 				
 				if(index == p_index){
 					setNavigationItemSelected(item, p_dispatchChange);
 				}else{
-					item.deSelect();
+					item.setDeSelected();
 				}
 			}
 		}
@@ -201,15 +201,15 @@ package bangfe.ui
 			var it : Iterator = _navigationItemCollection.iterator();
 			
 			while(it.hasNext()){
-				var item : NavigationItem = it.next() as NavigationItem;
-				item.deSelect();
+				var item : INavigationItem  = it.next() as INavigationItem ;
+				item.setDeSelected();
 			}
 		}
 		
 		//--------------------------------------
 		//  ACCESSOR METHODS
 		//--------------------------------------
-		public function get selectedNavigationItem () : NavigationItem
+		public function get selectedNavigationItem () : INavigationItem 
 		{
 			return _selectedNavigationItem;
 		}
@@ -217,17 +217,17 @@ package bangfe.ui
 		//--------------------------------------
 		//  PRIVATE METHODS
 		//--------------------------------------
-		private function addItemListeners ( p_navigationItem : NavigationItem ) : void
+		private function addItemListeners ( p_navigationItem : INavigationItem  ) : void
 		{
-			p_navigationItem.addEventListener(MouseEvent.CLICK, navigationItemClickHandler, false, 0, true);
+			p_navigationItem.selectRequesteSignal.add(navigationItemClickHandler);
 		}
 		
-		private function removeItemListeners ( p_navigationItem : NavigationItem ) : void
+		private function removeItemListeners ( p_navigationItem : INavigationItem  ) : void
 		{
-			p_navigationItem.removeEventListener(MouseEvent.CLICK, navigationItemClickHandler);
+			p_navigationItem.selectRequesteSignal.remove(navigationItemClickHandler);
 		}
 		
-		private function setNavigationItemSelected ( p_navigationItem : NavigationItem, p_dispatchChange : Boolean = true) : void
+		private function setNavigationItemSelected ( p_navigationItem : INavigationItem , p_dispatchChange : Boolean = true) : void
 		{
 			if(_selectedNavigationItem == p_navigationItem)return;
 			
@@ -241,9 +241,9 @@ package bangfe.ui
 		//  HANDLER METHODS
 		//--------------------------------------
 		
-		private function navigationItemClickHandler ( e : MouseEvent ) : void
+		private function navigationItemClickHandler ( p_navigtaionItem : NavigationItem ) : void
 		{
-			selectNavigationItem(e.target as NavigationItem);
+			selectNavigationItem(p_navigtaionItem);
 		}
 		
 	}

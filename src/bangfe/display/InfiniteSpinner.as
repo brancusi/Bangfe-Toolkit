@@ -10,12 +10,16 @@ package bangfe.display
 	import flash.utils.Timer;
 
 	/**
-	 * Simple mac preloader
+	 * Simple infinite spinner
 	 * @author Josh Feldman
 	 * 
 	 */	
-	public class MacPreloader extends Sprite
+	public class InfiniteSpinner extends Sprite
 	{
+		
+		//--------------------------------------
+		//  PRIVATE VARIABLES
+		//--------------------------------------
 		private var _innerRadius			:uint = 6;
 		private var _outerRadius			:uint = 12;
 		private var _numberOfSegments		:uint = 12;
@@ -34,7 +38,7 @@ package bangfe.display
 		 * @param p_numberOfSegements
 		 * 
 		 */
-		public function MacPreloader(p_innerRadius:uint = 6, p_outerRadius:uint = 12, p_numberOfSegements:uint = 12)
+		public function InfiniteSpinner(p_innerRadius:uint = 6, p_outerRadius:uint = 12, p_numberOfSegements:uint = 12)
 		{
 			this.visible = false;
 			this.alpha = 0;
@@ -59,6 +63,54 @@ package bangfe.display
 			TweenMax.to(this, .25, {autoAlpha:0, onComplete:function():void{
 				removeEventListener(Event.ENTER_FRAME, rotateCircle);
 			}});
+		}
+		
+		//--------------------------------------
+		//  ACCESSOR/MUTATOR METHODS
+		//--------------------------------------
+		public function get innerRadius () : uint 
+		{
+			return _innerRadius;
+		}
+		
+		public function set innerRadius ( p_innerRadius : uint ) : void
+		{
+			_innerRadius = p_innerRadius;
+			draw();
+		}
+		
+		public function get outerRadius () : uint 
+		{
+			return _outerRadius;
+		}
+		
+		public function set outerRadius ( p_outerRadius : uint ) : void
+		{
+			_outerRadius = p_outerRadius;
+			draw();
+		}
+		
+		public function get numberOfSegments () : uint 
+		{
+			return _numberOfSegments;
+		}
+		
+		public function set numberOfSegments ( p_numberOfSegments : uint ) : void
+		{
+			_numberOfSegments = p_numberOfSegments;
+			_degreesPerSegment = 360 / _numberOfSegments;
+			draw();
+		}
+		
+		public function get color () : Number 
+		{
+			return _color;
+		}
+		
+		public function set color ( p_color : Number ) : void
+		{
+			_color = p_color;
+			draw();
 		}
 		
 		//--------------------------------------

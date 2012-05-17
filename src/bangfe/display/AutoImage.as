@@ -11,6 +11,7 @@ package bangfe.display
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.geom.Matrix;
+	import flash.geom.Rectangle;
 	import flash.net.URLRequest;
 	import flash.system.ApplicationDomain;
 	import flash.system.LoaderContext;
@@ -74,6 +75,7 @@ package bangfe.display
 		private var _container : Sprite = new Sprite();
 		private var _scaleType : String = FILL;
 		private var _bitmap : Bitmap;
+		private var _buffer : Bitmap;
 		private var _extensionArray : Array;
 		private var _readySignal : Signal = new Signal(AutoImage);
 		private var _errorSignal : Signal = new Signal(AutoImage);
@@ -168,9 +170,36 @@ package bangfe.display
 			return this.width;
 		}
 		
+		/**
+		 * The raw bitmap height 
+		 * @return 
+		 * 
+		 */		
 		public function get rawHeight () : Number
 		{
 			if(bitmap)return bitmap.height; 
+			return this.height;
+		}
+		
+		/**
+		 * The buffer width. This is the actual visible image width 
+		 * @return 
+		 * 
+		 */		
+		public function get bufferWidth () : Number 
+		{
+			if(_buffer)return _buffer.width; 
+			return this.width;
+		}
+		
+		/**
+		 * The buffer height. This is the actual visible image height 
+		 * @return 
+		 * 
+		 */		
+		public function get bufferHeight () : Number 
+		{
+			if(_buffer)return _buffer.height; 
 			return this.height;
 		}
 		
@@ -248,7 +277,6 @@ package bangfe.display
 		public function set bitmap ( p_bitmap : Bitmap ) : void
 		{
 			_bitmap = p_bitmap;
-			_bitmap.smoothing = true;
 			generateImage();
 		}
 		
@@ -322,27 +350,27 @@ package bangfe.display
 		private function generateImage () : void
 		{
 			if(!bitmap)return;
-			if(isNaN(width))width = imageLoader.width;
-			if(isNaN(height))height = imageLoader.height;
+			if(isNaN(width))width = bitmap.width;
+			if(isNaN(height))height = bitmap.height;
 			
-			bitmap.scaleX = bitmap.scaleY = 1;
-			bitmap.smoothing = true;
+			_buffer = new Bitmap(_bitmap.bitmapData.clone());
+			_buffer.smoothing = true;
 			
-			var widthFactor:Number = width/bitmap.width;
-			var heightFactor:Number = height/bitmap.height;
+			var widthFactor:Number = width/_buffer.width;
+			var heightFactor:Number = height/_buffer.height;
 			
 			switch(scaleType){
 				case FILL :
-					bitmap.scaleX = bitmap.scaleY = Math.max(widthFactor, heightFactor);
+					_buffer.scaleX = _buffer.scaleY = Math.max(widthFactor, heightFactor);
 					break;
 				case FIT :
-					bitmap.scaleX = bitmap.scaleY = Math.min(widthFactor, heightFactor);
+					_buffer.scaleX = _buffer.scaleY = Math.min(widthFactor, heightFactor);
 					break;
 				default:
 					//
 					break;
 			}
-			
+
 			drawBitmap();
 		}
 		
@@ -350,28 +378,32 @@ package bangfe.display
 		{
 			_container.graphics.clear();
 			
-			var tempWidth : Number = bitmap.width;
-			var tempHeight : Number = bitmap.height;
+			var tempWidth : Number;
+			var tempHeight : Number;
 			
 			switch(scaleType){
 				case NO_SCALE :
-					tempWidth = bitmap.width;
-					tempHeight = bitmap.height;
+					tempWidth = _buffer.width;
+					tempHeight = _buffer.height;
 					break;
-				default:
+				case FIT :
+					tempWidth = _buffer.width;
+					tempHeight = _buffer.height;
+					break;
+				case FILL :
 					tempWidth = width;
 					tempHeight = height;
 					break;
 			}
 			
 			var matrix : Matrix = new Matrix();
-			matrix.tx = -(bitmap.width/2 - tempWidth/2);
-			matrix.ty = -(bitmap.height/2 - tempHeight/2);
-			var bitmapData : BitmapData = new BitmapData(tempWidth, tempHeight, true, 0x00000000);
+			matrix.tx = -(_buffer.width/2 - tempWidth/2);
+			matrix.ty = -(_buffer.height/2 - tempHeight/2);
+			var bitmapData : BitmapData = new BitmapData(tempWidth, tempHeight, false, 0xe3e3e3);
 			
 			//Must add to container for draw to work
 			var tempContainer : Sprite = new Sprite();
-			tempContainer.addChild(bitmap);
+			tempContainer.addChild(_buffer);
 			
 			bitmapData.draw(tempContainer, matrix, null, null, null, true);
 			

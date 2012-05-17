@@ -2,7 +2,7 @@ package bangfe.loading
 {
 	import bangfe.core.CoreDisplayObject;
 	import bangfe.core.IRunnable;
-	import bangfe.display.MacPreloader;
+	import bangfe.display.InfiniteSpinner;
 	
 	import com.greensock.events.LoaderEvent;
 	import com.greensock.loading.LoaderMax;
