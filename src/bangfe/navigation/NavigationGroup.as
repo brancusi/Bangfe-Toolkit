@@ -105,6 +105,9 @@ package bangfe.navigation
 				//Bi-directional reflection, garantees both sides (NavigationGroup and Navigationitem)
 				//have knowledge of eachother, so creation and destruction works correctly
 				p_navigationItem.navigationGroup = null;
+				
+				//Reset selected nav item
+				if(_selectedNavigationItem == p_navigationItem)_selectedNavigationItem = null;
 			}
 		}
 		
