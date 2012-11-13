@@ -4,6 +4,7 @@ package bangfe.loading
 	import bangfe.core.IRunnable;
 	import bangfe.display.InfiniteSpinner;
 	
+	import com.greensock.TweenMax;
 	import com.greensock.events.LoaderEvent;
 	import com.greensock.loading.LoaderMax;
 	import com.greensock.loading.SWFLoader;
@@ -74,7 +75,7 @@ package bangfe.loading
 			if(_targetContainer == null)throw new IllegalOperationError("You must define the target container before calling load");
 			
 			_swfLoader = new LoaderMax({ onProgress:onProgressHandler, onComplete:masterOnCompleteHandler});
-			_swfLoader.append(new SWFLoader(targetSWFURL, {container:targetContainer, name:targetSWFID, onInit:mainSWFInitHandler}));
+			_swfLoader.append(new SWFLoader(targetSWFURL, {name:targetSWFID, onInit:mainSWFInitHandler}));
 			_swfLoader.load();
 		}
 		
@@ -206,6 +207,8 @@ package bangfe.loading
 		{
 			var swfLoader : SWFLoader = _swfLoader.getLoader(targetSWFID) as SWFLoader;
 			_content = swfLoader.rawContent;
+			
+			targetContainer.addChild(_content);
 			
 			onSwfInit();
 			

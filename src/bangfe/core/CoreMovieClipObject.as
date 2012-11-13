@@ -1,7 +1,7 @@
 package bangfe.core
 {
 	
-	import flash.display.Sprite;
+	import flash.display.MovieClip;
 	import flash.events.Event;
 	
 	/**
@@ -10,7 +10,7 @@ package bangfe.core
 	 * @author Will Zadikian
 	 * 
 	 */
-	public class CoreMovieClipObject extends Sprite implements ICoreObject
+	public class CoreMovieClipObject extends MovieClip implements ICoreObject
 	{
 		//--------------------------------------
 		//  PRIVATE VARIABLES

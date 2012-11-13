@@ -399,7 +399,7 @@ package bangfe.display
 			var matrix : Matrix = new Matrix();
 			matrix.tx = -(_buffer.width/2 - tempWidth/2);
 			matrix.ty = -(_buffer.height/2 - tempHeight/2);
-			var bitmapData : BitmapData = new BitmapData(tempWidth, tempHeight, false, 0xe3e3e3);
+			var bitmapData : BitmapData = new BitmapData(tempWidth, tempHeight, true, 0xe3e3e3);
 			
 			//Must add to container for draw to work
 			var tempContainer : Sprite = new Sprite();
