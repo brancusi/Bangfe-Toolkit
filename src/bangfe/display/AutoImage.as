@@ -27,7 +27,7 @@ package bangfe.display
 	{
 		
 		//--------------------------------------
-		//  CONSTANTS
+		//  CONSTANTS 
 		//--------------------------------------
 		/**
 		 * Image ready event name

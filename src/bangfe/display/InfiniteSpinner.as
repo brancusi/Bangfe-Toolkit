@@ -18,7 +18,7 @@ package bangfe.display
 	{
 		
 		//--------------------------------------
-		//  PRIVATE VARIABLES
+		//  PRIVATE VARIABLES 
 		//--------------------------------------
 		private var _innerRadius			:uint = 6;
 		private var _outerRadius			:uint = 12;
